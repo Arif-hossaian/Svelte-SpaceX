@@ -7,7 +7,7 @@
     TableHead,
     TableHeadCell,
     Button,
-    
+    Badge
   } from 'flowbite-svelte';
 import { Chart, Card, A, Dropdown, DropdownItem, Popover, Tooltip } from 'flowbite-svelte';
 	import Modal from './Modal.svelte';
@@ -27,6 +27,9 @@ import { Chart, Card, A, Dropdown, DropdownItem, Popover, Tooltip } from 'flowbi
     const successRate = attempted > 0 ? ((successful / attempted) * 100).toFixed(2) : '0.00';
     return { ...zone, successRate: `${successRate}%` };
   });
+function capitalizeFirstLetter(str) {
+		return str.charAt(0).toUpperCase() + str.slice(1);
+	}
 
   console.log(processedData); // Debugging
   let filterStatus = "All";
@@ -43,86 +46,62 @@ import { Chart, Card, A, Dropdown, DropdownItem, Popover, Tooltip } from 'flowbi
     const successRate = pad.attempted_landings > 0
       ? ((pad.successful_landings / pad.attempted_landings) * 100).toFixed(2)
       : 0;
-    return { name: pad.name, rate: Number(successRate) };
+    return { name: pad.landing_type, rate: Number(successRate) };
   });
-   const options = {
-    series: successRates.map((pad) => pad.rate), // Success rates as series data
-    colors: ['#1C64F2', '#16BDCA', '#FDBA8C', '#E74694'], // Customize colors as needed
+  const newsuccessRates = data.props.users
+    .map((pad) => {
+      const successRate = pad.attempted_landings > 0
+        ? (pad.successful_landings / pad.attempted_landings) * 100
+        : 0;
+     return successRate.toFixed(2)
+    })
+    .sort((a, b) => b.rate - a.rate) // Sort by success rate in descending order
+    .slice(0, 6); // Take top 6
+
+  console.log('Filtered Success Rates:', newsuccessRates);
+     const options = {
+    series: successRates.map((pad) => Number(pad.rate)), // Dynamic series
+    labels: successRates.map((pad) => pad.name), // Dynamic labels
+    colors: ['#1C64F2', '#16BDCA', '#FDBA8C', '#E74694', '#A78BFA', '#34D399'],
     chart: {
+      type: 'donut',
       height: 320,
-      width: '100%',
-      type: 'donut'
-    },
-    stroke: {
-      colors: ['transparent'],
-      lineCap: ''
     },
     plotOptions: {
       pie: {
         donut: {
+          size: '80%',
           labels: {
             show: true,
             name: {
               show: true,
-              fontFamily: 'Inter, sans-serif',
-              offsetY: 20
+              offsetY: 20,
             },
             total: {
-              showAlways: true,
               show: true,
-              label: 'Success Rate',
-              fontFamily: 'Inter, sans-serif',
+              label: 'Landing Pads',
               formatter: function (w) {
-                return `${w.globals.seriesTotals.reduce((a, b) => a + b, 0).toFixed(2)}%`;
-              }
+                const sum = newsuccessRates.reduce((a, b) => a + b, 0);
+                //return `${sum.toFixed(2)}%`; // Display total percentage
+                return 6
+              },
             },
             value: {
               show: true,
-              fontFamily: 'Inter, sans-serif',
               offsetY: -20,
               formatter: function (value) {
-                return `${value}%`;
-              }
-            }
+                return `${value.toFixed(2)}%`; // Individual success rate percentage
+              },
+            },
           },
-          size: '80%'
-        }
-      }
-    },
-    grid: {
-      padding: {
-        top: -2
-      }
-    },
-    labels: successRates.map((pad) => pad.name), // Landing pad names as labels
-    dataLabels: {
-      enabled: false
+        },
+      },
     },
     legend: {
       position: 'bottom',
-      fontFamily: 'Inter, sans-serif'
     },
-    yaxis: {
-      labels: {
-        formatter: function (value) {
-          return value + '%';
-        }
-      }
-    },
-    xaxis: {
-      labels: {
-        formatter: function (value) {
-          return value + '%';
-        }
-      },
-      axisTicks: {
-        show: false
-      },
-      axisBorder: {
-        show: false
-      }
-    }
   };
+
     // View state
   let viewMode = "list"; // Toggle between "list" and "grid"
   
@@ -149,10 +128,11 @@ async function fetchLandpadDetails(id) {
 
 	// Load the landpads on mount
 	//onMount(fetchLandpadDetails);
-
+console.log('ttt', options.series)
  
 </script>
 
+console.log('test',options.series)
 <Navbar />
 <div class="grid grid-cols-12 gap-4 p-8 bg-gray-50 min-h-screen mt-16">
   
@@ -214,19 +194,16 @@ async function fetchLandpadDetails(id) {
   <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
 </svg>
 </TableBodyCell>
-            <TableBodyCell>
-              <span
-                class="px-2 py-1 rounded-full text-sm"
-                class:class:bg-green-100={zone.status === "Active"}
-                class:class:bg-red-100={zone.status === "Retired"}
-                class:class:bg-blue-100={zone.status === "Under Construction"}
-                class:class:text-green-700={zone.status === "Active"}
-                class:class:text-red-700={zone.status === "Retired"}
-                class:class:text-blue-700={zone.status === "Under Construction"}
-              >
-                {zone.status}
-              </span>
-            </TableBodyCell>
+         <TableBodyCell>
+							{#if zone.status === 'active'}
+								<Badge color="green">{capitalizeFirstLetter(zone.status)}</Badge>
+							{:else if zone.status === 'retired'}
+								<Badge color="red">{capitalizeFirstLetter(zone.status)}</Badge>
+							{:else}
+								<Badge color="blue">{capitalizeFirstLetter(zone.status)}</Badge>
+							{/if}
+						</TableBodyCell>
+        
           </TableBodyRow>
         {/each}
       </TableBody>
@@ -238,20 +215,16 @@ async function fetchLandpadDetails(id) {
         {#each filteredData as zone}
           <div class="p-4 bg-white border rounded-lg shadow">
             <h3 class="text-lg font-semibold">{zone.full_name}</h3>
-            <p class="text-sm text-gray-600">{zone.location.name}</p>
+            <p class="text-sm text-gray-600">Location Name: {zone.location.name}</p>
             <p class="text-sm text-gray-600">Region: {zone.location.region}</p>
             <p class="text-sm text-gray-600">Success Rate: {zone.successRate}</p>
-            <span
-              class="inline-block mt-2 px-3 py-1 rounded-full text-sm"
-              class:class:bg-green-100={zone.status === "Active"}
-              class:class:bg-red-100={zone.status === "Retired"}
-              class:class:bg-blue-100={zone.status === "Under Construction"}
-              class:class:text-green-700={zone.status === "Active"}
-              class:class:text-red-700={zone.status === "Retired"}
-              class:class:text-blue-700={zone.status === "Under Construction"}
-            >
-              {zone.status}
-            </span>
+            <p class="text-sm text-gray-600">Status:  {#if zone.status === 'active'}
+								<Badge color="green">{capitalizeFirstLetter(zone.status)}</Badge>
+							{:else if zone.status === 'retired'}
+								<Badge color="red">{capitalizeFirstLetter(zone.status)}</Badge>
+							{:else}
+								<Badge color="blue">{capitalizeFirstLetter(zone.status)}</Badge>
+							{/if}</p>
           </div>
         {/each}
       </div>
@@ -277,9 +250,14 @@ async function fetchLandpadDetails(id) {
       <h3 class="text-lg font-semibold mb-2">Success Rate Chart</h3>
       <div class="flex items-center justify-center">
         <!-- Replace with actual chart component -->
-        <div class="w-32 h-32 bg-pink-200 rounded-full flex items-center justify-center text-xl font-semibold text-gray-700">
-          <span>6</span>
-        </div>
+    
+           <Chart
+  {options}
+  series={options.series}
+  type="donut"
+  class="py-6"
+/>
+       
       </div>
     </div>
   </div>
