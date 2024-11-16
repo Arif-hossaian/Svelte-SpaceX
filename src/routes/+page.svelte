@@ -6,9 +6,14 @@
     TableBodyRow,
     TableHead,
     TableHeadCell,
-    Button
+    Button,
+    
   } from 'flowbite-svelte';
 import { Chart, Card, A, Dropdown, DropdownItem, Popover, Tooltip } from 'flowbite-svelte';
+	import Modal from './Modal.svelte';
+
+
+
   import { InfoCircleSolid, ArrowDownToBracketOutline, ChevronDownOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
 
  export let data; // Data from the load function
@@ -118,6 +123,32 @@ import { Chart, Card, A, Dropdown, DropdownItem, Popover, Tooltip } from 'flowbi
   };
     // View state
   let viewMode = "list"; // Toggle between "list" and "grid"
+  
+let showModal = false;
+	let modalHeader = '';
+	let modalContent = '';
+	let landpads = [];
+  // Fetch landpad details for a specific pad
+async function fetchLandpadDetails(id) {
+  console.log('id', id)
+		try {
+			const response = await fetch(`https://api.spacexdata.com/v3/landpads/${id}`);
+			if (!response.ok) throw new Error('Failed to fetch landpad details');
+			const data = await response.json();
+			// Populate modal content
+			modalHeader = data.full_name;  // Display full_name as the header
+      console.log('header', modalHeader)
+			modalContent = data.details
+			showModal = true;
+		} catch (error) {
+			console.error('Error fetching landpad details:', error);
+		}
+	}
+
+	// Load the landpads on mount
+	//onMount(fetchLandpadDetails);
+
+ 
 </script>
 
 <div class="grid grid-cols-12 gap-4 p-8 bg-gray-50 min-h-screen">
@@ -160,7 +191,10 @@ import { Chart, Card, A, Dropdown, DropdownItem, Popover, Tooltip } from 'flowbi
             <TableBodyCell>{zone.full_name}</TableBodyCell>
             <TableBodyCell>{zone.location.name}</TableBodyCell>
             <TableBodyCell>{zone.location.region}</TableBodyCell>
-            <TableBodyCell><Button outline>View Details</Button></TableBodyCell>
+            <TableBodyCell><Button on:click={() => fetchLandpadDetails(zone.id)}>
+  Open Modal
+</Button>
+</TableBodyCell>
             <TableBodyCell>
               <div class="flex items-center space-x-2">
                 <span>{zone.successRate}</span>
@@ -189,6 +223,7 @@ import { Chart, Card, A, Dropdown, DropdownItem, Popover, Tooltip } from 'flowbi
         {/each}
       </TableBody>
     </Table>
+
         {/if}
         {#if viewMode === "grid"}
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -241,3 +276,28 @@ import { Chart, Card, A, Dropdown, DropdownItem, Popover, Tooltip } from 'flowbi
     </div>
   </div>
 </div>
+<Modal bind:showModal>
+	{#snippet header()}
+		<h2>
+			Details - {modalHeader}
+			<p on:click={() => showModal(false)}>close</p>
+		</h2>
+	{/snippet}
+
+	<ol class="definition-list">
+		<li>{modalContent}</li>
+		<li>
+			containing provisions as to the mode of procedure or the manner of taking effect —used of a
+			contract or legacy
+		</li>
+		<li>of or relating to a musical mode</li>
+		<li>of or relating to structure as opposed to substance</li>
+		<li>
+			of, relating to, or constituting a grammatical form or category characteristically indicating
+			predication
+		</li>
+		<li>of or relating to a statistical mode</li>
+	</ol>
+
+	<a href="https://www.merriam-webster.com/dictionary/modal">merriam-webster.com</a>
+</Modal>
