@@ -11,6 +11,8 @@
   } from 'flowbite-svelte';
 import { Chart, Card, A, Dropdown, DropdownItem, Popover, Tooltip } from 'flowbite-svelte';
 	import Modal from './Modal.svelte';
+	import Navbar from '../components/Navbar.svelte';
+
 
 
 
@@ -151,7 +153,8 @@ async function fetchLandpadDetails(id) {
  
 </script>
 
-<div class="grid grid-cols-12 gap-4 p-8 bg-gray-50 min-h-screen">
+<Navbar />
+<div class="grid grid-cols-12 gap-4 p-8 bg-gray-50 min-h-screen mt-16">
   
   <div class="col-span-12 lg:col-span-8 bg-white p-6 rounded-lg shadow">
     <div class="flex justify-between items-center mb-4">
@@ -183,6 +186,7 @@ async function fetchLandpadDetails(id) {
         <TableHeadCell>Region</TableHeadCell>
         <TableHeadCell>Details</TableHeadCell>
         <TableHeadCell>Success Rate</TableHeadCell>
+        <TableHeadCell>Wikipedia Link</TableHeadCell>
         <TableHeadCell>Status</TableHeadCell>
       </TableHead>
       <TableBody>
@@ -192,7 +196,7 @@ async function fetchLandpadDetails(id) {
             <TableBodyCell>{zone.location.name}</TableBodyCell>
             <TableBodyCell>{zone.location.region}</TableBodyCell>
             <TableBodyCell><Button on:click={() => fetchLandpadDetails(zone.id)}>
-  Open Modal
+  View Details
 </Button>
 </TableBodyCell>
             <TableBodyCell>
@@ -206,6 +210,10 @@ async function fetchLandpadDetails(id) {
                 </div>
               </div>
             </TableBodyCell>
+              <TableBodyCell><a target="__blank" href={zone.wikipedia}><svg className="w-6 h-6 text-blue-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
+</svg>
+</TableBodyCell>
             <TableBodyCell>
               <span
                 class="px-2 py-1 rounded-full text-sm"
@@ -278,13 +286,16 @@ async function fetchLandpadDetails(id) {
 </div>
 <Modal bind:showModal>
 	{#snippet header()}
-		<h2>
-			Details - {modalHeader}
-			<p on:click={() => showModal(false)}>close</p>
-		</h2>
+  <div class="flex justify-between items-center mb-4">
+  <h1>	Details - {modalHeader}</h1>
+  <p on:click={() => showModal(false)}><svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18 17.94 6M18 18 6.06 6"/>
+</svg>
+</p></div>
+	
 	{/snippet}
 
-	<ol class="definition-list">
+	<ol class="definition-list mt-4">
 		<li>{modalContent}</li>
 		<li>
 			containing provisions as to the mode of procedure or the manner of taking effect —used of a
