@@ -116,13 +116,24 @@ import { Chart, Card, A, Dropdown, DropdownItem, Popover, Tooltip } from 'flowbi
       }
     }
   };
+    // View state
+  let viewMode = "list"; // Toggle between "list" and "grid"
 </script>
 
 <div class="grid grid-cols-12 gap-4 p-8 bg-gray-50 min-h-screen">
   
   <div class="col-span-12 lg:col-span-8 bg-white p-6 rounded-lg shadow">
     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-semibold">Landing Zones</h2>
+      <select
+          bind:value={viewMode}
+          class="border border-gray-300 rounded-lg px-4 py-2 bg-white text-gray-700"
+        >
+          <option value="list">List View</option>
+          <option value="grid">Grid View</option>
+        </select>
+
+        <!-- Dropdown for View Mode -->
+      
       <select
     bind:value={filterStatus}
     class="border border-gray-300 rounded-lg px-4 py-2 bg-white text-gray-700"
@@ -131,7 +142,9 @@ import { Chart, Card, A, Dropdown, DropdownItem, Popover, Tooltip } from 'flowbi
       <option value={status}>{status}</option>
     {/each}
   </select>
+
     </div>
+    {#if viewMode === "list"}
     <Table>
       <TableHead>
         <TableHeadCell>Full Name</TableHeadCell>
@@ -176,6 +189,30 @@ import { Chart, Card, A, Dropdown, DropdownItem, Popover, Tooltip } from 'flowbi
         {/each}
       </TableBody>
     </Table>
+        {/if}
+        {#if viewMode === "grid"}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {#each filteredData as zone}
+          <div class="p-4 bg-white border rounded-lg shadow">
+            <h3 class="text-lg font-semibold">{zone.full_name}</h3>
+            <p class="text-sm text-gray-600">{zone.location.name}</p>
+            <p class="text-sm text-gray-600">Region: {zone.location.region}</p>
+            <p class="text-sm text-gray-600">Success Rate: {zone.successRate}</p>
+            <span
+              class="inline-block mt-2 px-3 py-1 rounded-full text-sm"
+              class:class:bg-green-100={zone.status === "Active"}
+              class:class:bg-red-100={zone.status === "Retired"}
+              class:class:bg-blue-100={zone.status === "Under Construction"}
+              class:class:text-green-700={zone.status === "Active"}
+              class:class:text-red-700={zone.status === "Retired"}
+              class:class:text-blue-700={zone.status === "Under Construction"}
+            >
+              {zone.status}
+            </span>
+          </div>
+        {/each}
+      </div>
+    {/if}
   </div>
 
 
