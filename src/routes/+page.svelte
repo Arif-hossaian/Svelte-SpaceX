@@ -17,6 +17,17 @@ import { Chart, Card, A, Dropdown, DropdownItem, Popover, Tooltip } from 'flowbi
 
 
   import { InfoCircleSolid, ArrowDownToBracketOutline, ChevronDownOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
+    import { onMount } from "svelte";
+  import "ol/ol.css"; // Import OpenLayers CSS
+  import Map from "ol/Map";
+  import View from "ol/View";
+  import { Tile as TileLayer } from "ol/layer";
+  import { OSM } from "ol/source";
+  import { Feature } from "ol";
+  import { Point } from "ol/geom";
+  import { Vector as VectorLayer } from "ol/layer";
+  import { Vector as VectorSource } from "ol/source";
+  import { Style, Icon } from "ol/style"
 
  export let data; // Data from the load function
   console.log(data)
@@ -31,6 +42,20 @@ function capitalizeFirstLetter(str) {
 		return str.charAt(0).toUpperCase() + str.slice(1);
 	}
 
+
+  const newprocessedData = data.props.users.map((pad) => {
+    const attempted = pad.attempted_landings || 0;
+    const successful = pad.successful_landings || 0;
+
+    const successRate = attempted > 0
+      ? ((successful / attempted) * 100).toFixed(2)
+      : 0;
+
+    return {
+      ...pad,
+      successRate: Number(successRate),
+    };
+  });
   console.log(processedData); // Debugging
   let filterStatus = "All";
 
@@ -48,49 +73,43 @@ function capitalizeFirstLetter(str) {
       : 0;
     return { name: pad.landing_type, rate: Number(successRate) };
   });
-  const newsuccessRates = data.props.users
-    .map((pad) => {
-      const successRate = pad.attempted_landings > 0
-        ? (pad.successful_landings / pad.attempted_landings) * 100
-        : 0;
-     return successRate.toFixed(2)
-    })
-    .sort((a, b) => b.rate - a.rate) // Sort by success rate in descending order
-    .slice(0, 6); // Take top 6
+  const newsuccessRates = data.props.users.map((pad) => {
+    const attempted = pad.attempted_landings || 0;
+    const successful = pad.successful_landings || 0;
+
+    const successRate = attempted > 0
+      ? ((successful / attempted) * 100).toFixed(2)
+      : 0;
+
+    return {
+      name: pad.full_name, // Use full_name for better labels
+      rate: Number(successRate),
+    };
+  });
 
   console.log('Filtered Success Rates:', newsuccessRates);
-     const options = {
-    series: successRates.map((pad) => Number(pad.rate)), // Dynamic series
-    labels: successRates.map((pad) => pad.name), // Dynamic labels
-    colors: ['#1C64F2', '#16BDCA', '#FDBA8C', '#E74694', '#A78BFA', '#34D399'],
+  const options = {
+    series: newsuccessRates.map((pad) => pad.rate), // Data for the chart
+    labels: newsuccessRates.map((pad) => pad.name), // Names of landing pads
+    colors: ['#1C64F2', '#16BDCA', '#FDBA8C', '#E74694', '#A78BFA', '#34D399', '#FFB74D'], // Customize colors
     chart: {
       type: 'donut',
-      height: 320,
+      height: 320, // Adjust chart height
     },
     plotOptions: {
       pie: {
         donut: {
-          size: '80%',
+          size: '70%',
           labels: {
             show: true,
-            name: {
-              show: true,
-              offsetY: 20,
-            },
             total: {
               show: true,
-              label: 'Landing Pads',
-              formatter: function (w) {
-                const sum = newsuccessRates.reduce((a, b) => a + b, 0);
-                //return `${sum.toFixed(2)}%`; // Display total percentage
-                return 6
-              },
-            },
-            value: {
-              show: true,
-              offsetY: -20,
-              formatter: function (value) {
-                return `${value.toFixed(2)}%`; // Individual success rate percentage
+              label: 'Total Success',
+              formatter: function () {
+                const avgRate =
+                  successRates.reduce((acc, pad) => acc + pad.rate, 0) /
+                  successRates.length;
+                return `${avgRate.toFixed(2)}%`;
               },
             },
           },
@@ -129,8 +148,84 @@ async function fetchLandpadDetails(id) {
 	// Load the landpads on mount
 	//onMount(fetchLandpadDetails);
 console.log('ttt', options.series)
+
+ const locations = data.props.users.map((zone) => ({
+    id: zone.id,
+    name: zone.full_name,
+    lat: zone.location.latitude,
+    lon: zone.location.longitude,
+    status: zone.status,
+  }));
+
+  let map;
+
+  onMount(() => {
+    // Create features for each landing pad
+    const features = locations.map((location) => {
+      const feature = new Feature({
+        geometry: new Point([location.lon, location.lat]),
+        name: location.name,
+        status: location.status,
+      });
+
+      // Apply styles based on status
+      feature.setStyle(
+        new Style({
+          image: new Icon({
+            src:
+              location.status === "active"
+                ? "https://img.icons8.com/color/48/000000/marker--v1.png" // Green marker
+                : "https://img.icons8.com/color/48/000000/marker.png", // Red marker
+            scale: 0.8,
+          }),
+        })
+      );
+
+      return feature;
+    });
+
+    // Create vector source and layer
+    const vectorSource = new VectorSource({
+      features: features,
+    });
+
+    const vectorLayer = new VectorLayer({
+      source: vectorSource,
+    });
+
+    // Initialize the OpenLayers map
+    map = new Map({
+      target: "map", // Target the div with id "map"
+      layers: [
+        new TileLayer({
+          source: new OSM(),
+        }),
+        vectorLayer,
+      ],
+      view: new View({
+        center: [0, 0], // Default center (adjust as needed)
+        zoom: 2,
+      }),
+    });
+
+    // Center the map to show all features
+    const extent = vectorSource.getExtent();
+    map.getView().fit(extent, { padding: [50, 50, 50, 50], maxZoom: 10 });
+  });
  
 </script>
+
+
+<style>
+  #map {
+    height: 100%; /* Full height for the map container */
+    width: 100%;
+  }
+
+  .map-container {
+    height: 400px; /* Set a fixed height for the map */
+  }
+</style>
 
 console.log('test',options.series)
 <Navbar />
@@ -238,7 +333,8 @@ console.log('test',options.series)
       <h3 class="text-lg font-semibold mb-2">Map View</h3>
       <div class="h-60 bg-gray-100 flex items-center justify-center rounded">
         <!-- Replace with Map component or static image -->
-        <span class="text-gray-500">Map Placeholder</span>
+        <div id="map" class="map-container"></div>
+
       </div>
 
  
@@ -251,18 +347,13 @@ console.log('test',options.series)
       <div class="flex items-center justify-center">
         <!-- Replace with actual chart component -->
     
-           <Chart
-  {options}
-  series={options.series}
-  type="donut"
-  class="py-6"
-/>
+        <Chart {options} series={options.series} type="donut" class="py-6" />
        
       </div>
     </div>
   </div>
 </div>
-<Modal bind:showModal>
+<Modal bind:showModal autoclose>
 	{#snippet header()}
   <div class="flex justify-between items-center mb-4">
   <h1>	Details - {modalHeader}</h1>
