@@ -11,7 +11,7 @@
 <Navbar />
 
 <div class="mt-32 w-full px-24">
-	<Filter bind:viewMode/>
-  <TableComponent viewMode={viewMode}/>
+	<!-- <Filter bind:viewMode/> -->
+  <TableComponent />
 	
 </div>
