@@ -14,7 +14,7 @@
 	onMount(async () => {
 		rate = await calculatePercentage();
 
-		console.log(typeof rate);
+		//console.log(typeof rate);
 		// update the rate whenever attempted_landings or successful_landings change
 	});
 </script>

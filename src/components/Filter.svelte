@@ -8,12 +8,13 @@
 		GridSolid,
 		ListOutline
 	} from 'flowbite-svelte-icons';
-	import { get } from 'svelte/store';
+
 	import { sharedState } from '../shared/shared';
 
 	// Local state for the selected radio value
 	let group = null;
-    export let viewMode = "list";
+    const { viewMode, onViewModeChange } = $props();
+
 	// Subscribe to the store
 	sharedState.subscribe((value) => {
 		group = value;
@@ -24,27 +25,32 @@
 		group = event.target.value;
 		sharedState.set(group); // Update the shared store if needed
 	}
+	
 </script>
 
 <div class="flex w-[66%] items-center justify-between">
     <ButtonGroup>
         <!-- Button for List View -->
+        <!-- svelte-ignore attribute_quoted -->
         <Button
           outline
           color="dark"
           class="{viewMode === 'list' ? 'bg-gray-100' : ''}"
-          on:click={() => (viewMode = "list")}
+		  on:click={() => onViewModeChange('list')}
+
         >
           <ListOutline class="me-2 h-4 w-4 {viewMode === 'list' ? 'text-blue-500' : ''}" />
  
         </Button>
         
         <!-- Button for Grid View -->
+        <!-- svelte-ignore attribute_quoted -->
         <Button
           outline
           color="dark"
           class="{viewMode === 'grid' ? 'bg-gray-100' : ''}"
-          on:click={() => (viewMode = "grid")}
+		  on:click={() => onViewModeChange('grid')}
+
         >
           <GridSolid class="me-2 h-4 w-4 {viewMode === 'grid' ? 'text-blue-500' : ''}" />
 
