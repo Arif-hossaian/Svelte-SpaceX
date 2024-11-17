@@ -1,5 +1,5 @@
 <script>
-	import { Navbar, NavBrand, NavLi, NavUl, NavHamburger } from 'flowbite-svelte';
+	import { Navbar, NavBrand } from 'flowbite-svelte';
 </script>
 
 <Navbar class="fixed top-0 z-20 w-full border-b px-2 py-4 sm:px-4">

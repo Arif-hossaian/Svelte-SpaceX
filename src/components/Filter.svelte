@@ -1,9 +1,7 @@
 <script>
-	import { ButtonGroup, Button, Dropdown, DropdownItem, Radio } from 'flowbite-svelte';
+	import { ButtonGroup, Button, Dropdown, Radio } from 'flowbite-svelte';
 	import {
-		UserCircleSolid,
 		AdjustmentsVerticalOutline,
-		DownloadSolid,
 		ChevronDownOutline,
 		GridSolid,
 		ListOutline
