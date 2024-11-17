@@ -90,10 +90,13 @@
                                     /></TableBodyCell
                                 >
                                 <TableBodyCell>
-                                    <LinkOutline
+                                    
+                                    <a target="_blank" href={item.wikipedia} class="cursor-pointer text-blue-700">
+                                        <LinkOutline
                                         class="cursor-pointer text-blue-700"
-                                        onclick={() => navigateToAbout(item.wikipedia)}
+                                     
                                     />
+                                    </a>
                                 </TableBodyCell>
                                 <TableBodyCell>
                                     {#if item.status === 'active'}
