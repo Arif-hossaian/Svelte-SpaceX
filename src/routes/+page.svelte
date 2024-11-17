@@ -1,22 +1,15 @@
 <script>
-  import {
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-    Button,
-    Badge
-  } from 'flowbite-svelte';
+
 import { Chart, Card, A, Dropdown, DropdownItem, Popover, Tooltip } from 'flowbite-svelte';
 	import Modal from './Modal.svelte';
 	import Navbar from '../components/Navbar.svelte';
+  import LandingPadTable from '../components/LandingPadTable.svelte';
+  import LandingPadGrid from '../components/LandingPadGrid.svelte';
 
 
 
 
-  import { InfoCircleSolid, ArrowDownToBracketOutline, ChevronDownOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
+  import { InfoCircleSolid, ArrowDownToBracketOutline, ChevronDownOutline, ChevronRightOutline , ListOutline, GridSolid} from 'flowbite-svelte-icons';
     import { onMount } from "svelte";
   import "ol/ol.css"; // Import OpenLayers CSS
   import Map from "ol/Map";
@@ -28,6 +21,8 @@ import { Chart, Card, A, Dropdown, DropdownItem, Popover, Tooltip } from 'flowbi
   import { Vector as VectorLayer } from "ol/layer";
   import { Vector as VectorSource } from "ol/source";
   import { Style, Icon } from "ol/style"
+  import { ButtonGroup, Button,  Radio } from 'flowbite-svelte';
+
 
  export let data; // Data from the load function
   console.log(data)
@@ -104,7 +99,7 @@ function capitalizeFirstLetter(str) {
             show: true,
             total: {
               show: true,
-              label: 'Total Success',
+              label: 'Landing Pads',
               formatter: function () {
                 const avgRate =
                   successRates.reduce((acc, pad) => acc + pad.rate, 0) /
@@ -233,15 +228,33 @@ console.log('test',options.series)
   
   <div class="col-span-12 lg:col-span-8 bg-white p-6 rounded-lg shadow">
     <div class="flex justify-between items-center mb-4">
-      <select
-          bind:value={viewMode}
-          class="border border-gray-300 rounded-lg px-4 py-2 bg-white text-gray-700"
+      <ButtonGroup>
+        <!-- Button for List View -->
+        <Button
+          outline
+          color="dark"
+          class="{viewMode === 'list' ? 'bg-gray-100' : ''}"
+          on:click={() => (viewMode = "list")}
         >
-          <option value="list">List View</option>
-          <option value="grid">Grid View</option>
-        </select>
+          <ListOutline class="me-2 h-4 w-4 {viewMode === 'list' ? 'text-blue-500' : ''}" />
+ 
+        </Button>
+        
+        <!-- Button for Grid View -->
+        <Button
+          outline
+          color="dark"
+          class="{viewMode === 'grid' ? 'bg-gray-100' : ''}"
+          on:click={() => (viewMode = "grid")}
+        >
+          <GridSolid class="me-2 h-4 w-4 {viewMode === 'grid' ? 'text-blue-500' : ''}" />
 
-        <!-- Dropdown for View Mode -->
+        </Button>
+      </ButtonGroup>
+      
+    
+
+ 
       
       <select
     bind:value={filterStatus}
@@ -254,76 +267,10 @@ console.log('test',options.series)
 
     </div>
     {#if viewMode === "list"}
-    <Table>
-      <TableHead>
-        <TableHeadCell>Full Name</TableHeadCell>
-        <TableHeadCell>Location Name</TableHeadCell>
-        <TableHeadCell>Region</TableHeadCell>
-        <TableHeadCell>Details</TableHeadCell>
-        <TableHeadCell>Success Rate</TableHeadCell>
-        <TableHeadCell>Wikipedia Link</TableHeadCell>
-        <TableHeadCell>Status</TableHeadCell>
-      </TableHead>
-      <TableBody>
-        {#each filteredData as zone}
-          <TableBodyRow>
-            <TableBodyCell>{zone.full_name}</TableBodyCell>
-            <TableBodyCell>{zone.location.name}</TableBodyCell>
-            <TableBodyCell>{zone.location.region}</TableBodyCell>
-            <TableBodyCell><Button on:click={() => fetchLandpadDetails(zone.id)}>
-  View Details
-</Button>
-</TableBodyCell>
-            <TableBodyCell>
-              <div class="flex items-center space-x-2">
-                <span>{zone.successRate}</span>
-                <div class="w-full bg-gray-200 rounded h-2.5">
-                  <div
-                    class="h-2.5 rounded"
-                    style="width: {zone.successRate}; background-color: #4ade80;"
-                  ></div>
-                </div>
-              </div>
-            </TableBodyCell>
-              <TableBodyCell><a target="__blank" href={zone.wikipedia}><svg className="w-6 h-6 text-blue-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
-</svg>
-</TableBodyCell>
-         <TableBodyCell>
-							{#if zone.status === 'active'}
-								<Badge color="green">{capitalizeFirstLetter(zone.status)}</Badge>
-							{:else if zone.status === 'retired'}
-								<Badge color="red">{capitalizeFirstLetter(zone.status)}</Badge>
-							{:else}
-								<Badge color="blue">{capitalizeFirstLetter(zone.status)}</Badge>
-							{/if}
-						</TableBodyCell>
-        
-          </TableBodyRow>
-        {/each}
-      </TableBody>
-    </Table>
-
-        {/if}
-        {#if viewMode === "grid"}
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {#each filteredData as zone}
-          <div class="p-4 bg-white border rounded-lg shadow">
-            <h3 class="text-lg font-semibold">{zone.full_name}</h3>
-            <p class="text-sm text-gray-600">Location Name: {zone.location.name}</p>
-            <p class="text-sm text-gray-600">Region: {zone.location.region}</p>
-            <p class="text-sm text-gray-600">Success Rate: {zone.successRate}</p>
-            <p class="text-sm text-gray-600">Status:  {#if zone.status === 'active'}
-								<Badge color="green">{capitalizeFirstLetter(zone.status)}</Badge>
-							{:else if zone.status === 'retired'}
-								<Badge color="red">{capitalizeFirstLetter(zone.status)}</Badge>
-							{:else}
-								<Badge color="blue">{capitalizeFirstLetter(zone.status)}</Badge>
-							{/if}</p>
-          </div>
-        {/each}
-      </div>
-    {/if}
+    <LandingPadTable {filteredData} {fetchLandpadDetails} />
+  {:else}
+    <LandingPadGrid {filteredData} />
+  {/if}
   </div>
 
 
@@ -355,12 +302,9 @@ console.log('test',options.series)
 </div>
 <Modal bind:showModal autoclose>
 	{#snippet header()}
-  <div class="flex justify-between items-center mb-4">
+
   <h1>	Details - {modalHeader}</h1>
-  <p on:click={() => showModal(false)}><svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18 17.94 6M18 18 6.06 6"/>
-</svg>
-</p></div>
+
 	
 	{/snippet}
 

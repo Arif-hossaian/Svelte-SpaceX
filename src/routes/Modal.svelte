@@ -1,7 +1,7 @@
 <script>
 	let { showModal = $bindable(), header, children } = $props();
 
-	let dialog = $state(); // HTMLDialogElement
+	let dialog; // HTMLDialogElement reference
 
 	$effect(() => {
 		if (showModal) dialog.showModal();
@@ -12,15 +12,48 @@
 <dialog
 	bind:this={dialog}
 	onclose={() => (showModal = false)}
-	onclick={(e) => { if (e.target === dialog) dialog.close(); }}
+	onclick={(e) => {
+		// Close modal if the backdrop (dialog itself) is clicked
+		if (e.target === dialog) dialog.close();
+	}}
 >
 	<div>
-		{@render header?.()}
+		<div class="flex justify-between items-center mb-4">
+			<!-- Render header content if provided -->
+			{@render header?.()}
+			
+			<!-- Close button -->
+			<button 
+				autofocus 
+				aria-label="Close modal" 
+				onclick={() => dialog.close()}
+			>
+				<svg 
+					class="w-6 h-6 text-gray-800 dark:text-white" 
+					xmlns="http://www.w3.org/2000/svg" 
+					width="24" 
+					height="24" 
+					viewBox="0 0 24 24" 
+					fill="none" 
+					aria-hidden="true"
+				>
+					<path 
+						stroke="currentColor" 
+						stroke-linecap="round" 
+						stroke-linejoin="round" 
+						stroke-width="2" 
+						d="M6 18L18 6M18 18L6 6"
+					/>
+				</svg>
+			</button>
+		</div>
+		
 		<hr />
+		
+		<!-- Render children content if provided -->
 		{@render children?.()}
+		
 		<hr />
-		<!-- svelte-ignore a11y_autofocus -->
-		<button autofocus onclick={() => dialog.close()}>close modal</button>
 	</div>
 </dialog>
 
@@ -61,5 +94,8 @@
 	}
 	button {
 		display: block;
+		background: none;
+		border: none;
+		cursor: pointer;
 	}
 </style>
