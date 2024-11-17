@@ -55,7 +55,7 @@
     let viewMode = $state("list");
 
 
-// Handler for viewMode change from the Filter component
+
 
 </script>
 
@@ -69,6 +69,8 @@
         {#await promise}
     <TableLoader />
 {:then data}
+{console.log('', data)}
+{console.log('currentValue', currentValue)}
     <div class="col-span-3 w-full md:col-span-2">
         {#if viewMode === "list"}
             <!-- List View (Existing Table Component) -->

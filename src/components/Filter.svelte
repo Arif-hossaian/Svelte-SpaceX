@@ -23,7 +23,7 @@
 	// Function to update the shared state when a radio button is selected
 	function handleChange(event) {
 		group = event.target.value;
-		sharedState.set(group); // Update the shared store if needed
+		sharedState.set(group === "all" ? null : group);
 	}
 	
 </script>
@@ -66,6 +66,15 @@
 		/></Button
 	>
 	<Dropdown class="w-48 space-y-1 p-3 ">
+		<li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+			<Radio
+				name="group"
+				class="focus:text-indigo-600 focus:ring-2 focus:ring-indigo-600"
+				bind:group
+				on:change={handleChange}
+				value="all">All</Radio
+			>
+		</li>
 		<li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
 			<Radio
 				name="group"
