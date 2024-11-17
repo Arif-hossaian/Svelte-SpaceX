@@ -1,38 +1,71 @@
-# sv
+# SpaceX Landpad Viewer
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A Svelte-based application to view and filter SpaceX landpads with detailed information, maps, and charts. This project uses the Flowbite Svelte component library for UI and integrates a shared state for managing filters and view modes.
 
-## Creating a project
+Features:
 
-If you're seeing this, you've probably already done this step. Congrats!
+- View SpaceX landpads in a list or grid view.
+- View SpaceX landpads in a list or grid view.
+- Interactive modal to display detailed information.
+- Map and chart visualizations for landpads.
+- Uses the SpaceX API to fetch real-time data.
+
+## Prerequisites
 
 ```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+node >= 18
+npm >= 9
 ```
 
-## Developing
+## Installation Steps
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+1. Clone the repository:
+
+```bash
+git clone https://github.com/Arif-hossaian/Svelte-SpaceX.git
+cd Svelte-SpaceX
+```
+
+2. Install base dependencies:
+
+```bash
+npm install
+```
+
+3. Install required packages:
+
+```bash
+npm install flowbite-svelte flowbite-svelte-icons
+```
+
+## Development
+
+Start the development server:
 
 ```bash
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
 ## Building
 
-To create a production version of your app:
+To create a production build:
 
 ```bash
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+## Testing Production Build
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+To preview the production build:
+
+```bash
+npm run preview
+```
+
+Technologies Used:
+- Sevlte 5
+- Sevlte Kit
+- Flowbite Sevlte
+- SpaceX API
+- Mapbox GL (for maps)
+- Doughnut Chart (for chart visualization)
